@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  node-app:
+    
+    build:
+      context: .
+      dockerfile: DockerFile
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:latest
+    depends_on:
+      - node-app
+    volumes:
+      - ./:/etc/prometheus
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=smtp.gmail.com:587
+      - GF_SMTP_USER=raviswamiji512@gmail.com
+      - GF_SMTP_PASSWORD=qsoejeuvwcfwiilt
+      - GF_SMTP_FROM_ADDRESS=raviswamiji512@gmail.com
+      - GF_SMTP_FROM_NAME=Grafana Alerts
+    volumes:
+      - grafana-data:/var/lib/grafana 
+
+networks:
+  monitoring:
+
+volumes:
+  prometheus-data:
+  grafana-data:
